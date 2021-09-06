@@ -10,4 +10,6 @@
     <color name="colorPositive">#FC6203</color>
     <color name="colorNegative">#03fc4e</color>
     <color name="colorDeath">#fc0303</color>
+    <color name="sparkBackColor">#d5e7f0</color>
+    <color name="colorSelectedBackground">#8C8D91</color>
 </resources>

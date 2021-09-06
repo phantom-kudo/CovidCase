@@ -11,6 +11,9 @@ import androidx.core.content.ContextCompat
 import com.google.gson.GsonBuilder
 import com.robinhood.spark.SparkAdapter
 import com.robinhood.spark.SparkView
+import com.robinhood.ticker.TickerUtils
+import com.robinhood.ticker.TickerView
+import org.angmarch.views.NiceSpinner
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: CovidSparkAdapter
     private lateinit var perStateDailyData: Map<String,List<CovidData>>
     private lateinit var nationalDailyData: List<CovidData>
-    lateinit var tvMetricLabel:TextView
+    lateinit var tvMetricLabel:TickerView
     lateinit var tvDateLabel:TextView
     lateinit var radioBtnPositive:RadioButton
     lateinit var radioBtnNegative:RadioButton
@@ -41,11 +44,12 @@ class MainActivity : AppCompatActivity() {
     lateinit var sparkView:SparkView
     lateinit var radioGroupPeriodSelection:RadioGroup
     lateinit var radioGroupMetricSelection:RadioGroup
+    lateinit var selectedSpinner:NiceSpinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        tvMetricLabel = findViewById(R.id.tvMetricLabel)
+        tvMetricLabel = findViewById(R.id.tickerView)
         tvDateLabel = findViewById(R.id.tvDateLabel)
         radioBtnPositive = findViewById(R.id.radioButtonPositive)
         radioBtnNegative = findViewById(R.id.radioButtonNegative)
@@ -56,7 +60,9 @@ class MainActivity : AppCompatActivity() {
         sparkView = findViewById(R.id.sparkView)
         radioGroupPeriodSelection = findViewById(R.id.radioGroupPeriodSelection)
         radioGroupMetricSelection = findViewById(R.id.radioGroupMetricSelection)
+        selectedSpinner = findViewById(R.id.spinnerSelect)
 
+        supportActionBar?.title = getString(R.string.app_description)
 
         val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create()
         val retrofit = Retrofit.Builder()
@@ -111,10 +117,19 @@ class MainActivity : AppCompatActivity() {
         stateAbbreviationList.add(0,ALL_STATES)
 
         //Add state list as a data source for the spinner
+        selectedSpinner.attachDataSource(stateAbbreviationList)
+        selectedSpinner.setOnSpinnerItemSelectedListener { parent, _ , position, _ ->
+            val selectedState = parent.getItemAtPosition(position) as String
+            val selectedData = perStateDailyData[selectedState] ?: nationalDailyData
+            updateDisplayWithData(selectedData)
+        }
 
     }
 
     private fun setUpEventListener() {
+        //Updating the TickerView
+        tvMetricLabel.setCharacterLists(TickerUtils.provideNumberList())
+
         //Add a listener when user scrubs over the screen
         sparkView.isScrubEnabled = true
         sparkView.setScrubListener { itemData ->

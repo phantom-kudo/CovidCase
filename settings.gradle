@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Covid Case"
 include ':app'
+include ':library'
